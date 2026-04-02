@@ -21,6 +21,6 @@ The stocksensor/ota topic is used to command the board to remain awake for any r
 
 These scales were connected to HomeAssistant, but they can be used in other contexts.
 
-These scales only have to run for a few seconds every hour. It is possible to configure the run duration and sleep duration within the .yaml files.
+These scales only have to run for a few seconds every hour. It is possible to configure the run duration and sleep duration within the .yaml files. With the current settings and a 3000mAh lipo battery, they run for around 10-14 days on a single charge.
 
 Today, it is likely better to use low-power bluetooth, but at the time, this worked well enough.
