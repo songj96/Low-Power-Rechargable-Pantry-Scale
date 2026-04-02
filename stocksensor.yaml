@@ -1,0 +1,85 @@
+esphome:
+  name: "" 
+  
+esp8266:
+  board: 
+
+logger:
+
+ota:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  fast_connect: true
+  manual_ip:
+    static_ip: 
+    gateway: 192.168.1.1
+    subnet: 255.255.255.0
+
+  ap:
+    ssid: "" 
+    password: ""
+
+captive_portal:
+
+deep_sleep:
+  id: 
+  run_duration: 4s
+  sleep_duration: 60min
+
+sensor:
+  - platform: hx711
+    name: "scale"
+    id: scale
+    dout_pin: D2 
+    clk_pin: D1 
+    gain: 128
+    update_interval: 1s
+    accuracy_decimals: 0
+    unit_of_measurement: g
+    filters:
+      - calibrate_linear: #Calibration here
+          - 473400 -> 0
+          - 771000 -> 4580
+    on_value:
+      - mqtt.publish:
+          topic: "stock/scale0" 
+          payload: !lambda |-
+            return to_string(id(scale).state);
+          retain: true
+    
+  - platform: adc
+    id: battery
+    name: "battery"
+    pin: A0
+    update_interval: 1s
+    raw: true
+    filters:
+      - calibrate_linear:
+          - 325 -> 0
+          - 415 -> 100
+    accuracy_decimals: 0
+    unit_of_measurement: '%'
+    on_value:
+      - mqtt.publish:
+          topic: "stock/scale0battery" 
+          payload: !lambda |-
+            return to_string(id(battery).state);
+          retain: true
+  
+mqtt:
+  broker: 192.168.1.145
+  username: mqtt
+  password: !secret mqtt_password
+  birth_message:
+  will_message:
+  on_message:
+    - topic: stocksensor/ota
+      payload: 'ON'
+      then:
+        - deep_sleep.prevent: deep_sleep
+    - topic: stocksensor/ota
+      payload: 'OFF'
+      then:
+        - deep_sleep.allow: deep_sleep
